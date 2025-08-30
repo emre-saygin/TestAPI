@@ -1,27 +1,21 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER $APP_UID
-WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
-	
-
-# This stage is used to build the service project
+# 1. Build stage
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["TestAPI.csproj", "TestAPI/"]
-RUN dotnet restore "./TestAPI/TestAPI.csproj"
+
+# csproj ve restore
+COPY ["TestAPI/TestAPI.csproj", "TestAPI/"]
+RUN dotnet restore "TestAPI/TestAPI.csproj"
+
+# Tüm proje dosyalarýný kopyala
 COPY . .
-WORKDIR "/src/TestAPI"
-RUN dotnet build "./TestAPI.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR /src/TestAPI
 
-# This stage is used to publish the service project to be copied to the final stage
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./TestAPI.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+# Publish (Release)
+RUN dotnet publish "TestAPI.csproj" -c Release -o /app/publish
 
-# This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
-FROM base AS final
+# 2. Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build /app/publish .
+
 ENTRYPOINT ["dotnet", "TestAPI.dll"]

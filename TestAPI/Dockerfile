@@ -3,14 +3,14 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # csproj ve restore
-COPY ["TestAPI.csproj", "TestAPI/"]
+COPY TestAPI.csproj ./
 RUN dotnet restore "TestAPI.csproj"
 
 # Tüm proje dosyalarýný kopyala
 COPY . .
-WORKDIR /src/TestAPI
+WORKDIR /src
 
-# Publish (Release)
+# Publish
 RUN dotnet publish "TestAPI.csproj" -c Release -o /app/publish
 
 # 2. Runtime stage

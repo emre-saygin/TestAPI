@@ -3,8 +3,8 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # csproj ve restore
-COPY ["TestAPI/TestAPI.csproj", "TestAPI/"]
-RUN dotnet restore "TestAPI/TestAPI.csproj"
+COPY ["TestAPI.csproj", "TestAPI/"]
+RUN dotnet restore "TestAPI.csproj"
 
 # Tüm proje dosyalarýný kopyala
 COPY . .
